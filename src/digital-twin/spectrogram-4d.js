@@ -136,6 +136,9 @@ class BayesianBetaTracker {
   }
   
   update(coherenceMeasurement) {
+    // Input sanitization and bounds check
+    coherenceMeasurement = Math.max(0, Math.min(1, coherenceMeasurement || 0));
+
     this.alpha += coherenceMeasurement;
     this.beta += (1.0 - coherenceMeasurement);
     
