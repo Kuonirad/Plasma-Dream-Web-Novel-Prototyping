@@ -1,0 +1,47 @@
+name: Plasma Dream-Web CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-digital-twin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run digital twin validation tests
+        run: node tests/digital-twin-validation.js
+
+  validate-python-controller:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install numpy scipy
+      - name: Validate Bayesian controller
+        run: |
+          python -c "
+          import importlib.util
+          spec = importlib.util.spec_from_file_location('bbc', 'src/bayesian-controller/bayesian-beta-controller.py')
+          bbc = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(bbc)
+          c = bbc.BayesianBetaController()
+          assert abs(c.unison - 0.5) < 0.01, 'Initial unison failed'
+          for _ in range(100): c.update(0.9)
+          assert c.unison > 0.8, 'High-coherence update failed'
+          s = c.check_safety(ozone_ppb=18.0, temperature_c=45.0)
+          assert not s['safe'], 'Ozone shutdown failed'
+          print('Controller validated.')
+          "
+      - name: Generate BOM
+        run: python scripts/build-bom.py > /tmp/bom.md && head -5 /tmp/bom.md
