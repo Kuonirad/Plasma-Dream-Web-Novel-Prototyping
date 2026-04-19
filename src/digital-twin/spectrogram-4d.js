@@ -43,26 +43,9 @@ const CONFIG = {
   PWM_FREQ_MAX: 10.0,
   PWM_DUTY_DEFAULT: 0.5,
   
-  // Bayesian unison
-  UNISON_THRESHOLD: 0.85,
-  ALPHA_INIT: 2.0,
-  BETA_INIT: 2.0,
-  DECAY_RATE: 0.999,
-  
-  // Texture depth layers
-  TEXTURE_DEPTHS: [
-    'gaussian',
-    'bilateral',
-    'perlin',
-    'fractal_fbm',
-    'voronoi_plasma'
-  ],
-  
   // Rendering
   POINT_SIZE_MIN: 1.0,
-  POINT_SIZE_MAX: 8.0,
-  CANVAS_WIDTH: 1200,
-  CANVAS_HEIGHT: 600
+  POINT_SIZE_MAX: 8.0
 };
 
 // ============================================================
@@ -134,9 +117,13 @@ function generatePlasmaTemplate() {
 // ============================================================
 
 class BayesianBetaTracker {
+  static ALPHA_INIT = 2.0;
+  static BETA_INIT = 2.0;
+  static DECAY_RATE = 0.999;
+
   constructor() {
-    this.alpha = CONFIG.ALPHA_INIT;
-    this.beta = CONFIG.BETA_INIT;
+    this.alpha = BayesianBetaTracker.ALPHA_INIT;
+    this.beta = BayesianBetaTracker.BETA_INIT;
   }
   
   get unison() {
@@ -153,8 +140,8 @@ class BayesianBetaTracker {
     this.beta += (1.0 - coherenceMeasurement);
     
     // Memory decay
-    this.alpha *= CONFIG.DECAY_RATE;
-    this.beta *= CONFIG.DECAY_RATE;
+    this.alpha *= BayesianBetaTracker.DECAY_RATE;
+    this.beta *= BayesianBetaTracker.DECAY_RATE;
     
     // Floor
     this.alpha = Math.max(this.alpha, 1.0);
@@ -173,8 +160,8 @@ class BayesianBetaTracker {
   }
   
   reset() {
-    this.alpha = CONFIG.ALPHA_INIT;
-    this.beta = CONFIG.BETA_INIT;
+    this.alpha = BayesianBetaTracker.ALPHA_INIT;
+    this.beta = BayesianBetaTracker.BETA_INIT;
   }
 }
 
