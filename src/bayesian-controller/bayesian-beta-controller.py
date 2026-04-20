@@ -96,6 +96,15 @@ class BayesianBetaController:
         Returns:
             dict with control outputs and diagnostics
         """
+        try:
+            coherence_measurement = float(coherence_measurement)
+            if np.isnan(coherence_measurement):
+                coherence_measurement = 0.0
+        except (ValueError, TypeError):
+            coherence_measurement = 0.0
+
+        coherence_measurement = max(0.0, min(1.0, coherence_measurement))
+
         # Bayesian update: Beta-Bernoulli conjugate
         # Treat measurement as soft evidence
         self.alpha += coherence_measurement
