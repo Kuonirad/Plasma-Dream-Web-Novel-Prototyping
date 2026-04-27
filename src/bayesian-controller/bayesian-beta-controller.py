@@ -96,6 +96,15 @@ class BayesianBetaController:
         Returns:
             dict with control outputs and diagnostics
         """
+        # Security: Input validation to prevent NaN poisoning and out-of-bounds errors
+        try:
+            coherence_measurement = float(coherence_measurement)
+            if np.isnan(coherence_measurement):
+                coherence_measurement = 0.0
+            coherence_measurement = np.clip(coherence_measurement, 0.0, 1.0)
+        except (ValueError, TypeError):
+            coherence_measurement = 0.0
+
         # Bayesian update: Beta-Bernoulli conjugate
         # Treat measurement as soft evidence
         self.alpha += coherence_measurement
