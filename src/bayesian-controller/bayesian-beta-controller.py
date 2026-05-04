@@ -96,6 +96,15 @@ class BayesianBetaController:
         Returns:
             dict with control outputs and diagnostics
         """
+        # Input sanitization and bounds check (Security: Prevent DoS via crash)
+        try:
+            val = float(coherence_measurement)
+            if np.isnan(val):
+                val = 0.0
+        except (ValueError, TypeError):
+            val = 0.0
+        coherence_measurement = float(np.clip(val, 0.0, 1.0))
+
         # Bayesian update: Beta-Bernoulli conjugate
         # Treat measurement as soft evidence
         self.alpha += coherence_measurement

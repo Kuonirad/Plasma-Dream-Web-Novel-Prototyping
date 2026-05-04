@@ -1,0 +1,4 @@
+## 2026-04-19 - [Preventing Controller DoS via Sensor Input Sanitization]
+**Vulnerability:** The Python `BayesianBetaController.update` method accepted `coherence_measurement` without sanitizing for NaN or non-numeric types, causing fatal exceptions (DoS) when invalid data is piped from the sensor or digital twin.
+**Learning:** Even internal signals between system components (e.g., from WebGL twin to Python controller) must be treated as untrusted input. In a physical control system, a crash in the controller loop could leave the hardware in a dangerous state (e.g., leaving a high-voltage coil continuously on without feedback).
+**Prevention:** Always implement explicit input sanitization (`float()` casting, `NaN` handling, and bounds clipping using `np.clip`) at the boundary of any continuous control loop, defaulting to safe values (0.0).
